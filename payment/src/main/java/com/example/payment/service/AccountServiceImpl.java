@@ -1,5 +1,6 @@
 package com.example.payment.service;
 
+import com.example.payment.kafka.PaymentStatusProducer;
 import com.example.payment.model.Account;
 import com.example.payment.repository.AccountRepository;
 import jakarta.transaction.Transactional;
@@ -14,9 +15,12 @@ public class AccountServiceImpl implements AccountService {
 
     private final AccountRepository accountRepository;
 
+    private final PaymentStatusProducer paymentStatusProducer;
+
     @Autowired
-    public AccountServiceImpl(AccountRepository accountRepository) {
+    public AccountServiceImpl(AccountRepository accountRepository, PaymentStatusProducer paymentStatusProducer) {
         this.accountRepository = accountRepository;
+        this.paymentStatusProducer = paymentStatusProducer;
     }
 
     @Override
@@ -47,12 +51,18 @@ public class AccountServiceImpl implements AccountService {
     @Override
     @Transactional
     public void subtractFromBalance(Long userId, BigDecimal amount, Long orderId) {
-        Account account = accountRepository
-                .findByUserId(userId)
-                .orElseThrow(() -> new IllegalArgumentException("Account not found for user id: " + userId));
+        try {
+            Account account = accountRepository
+                    .findByUserId(userId)
+                    .orElseThrow(() -> new IllegalArgumentException("Account not found for user id: " + userId));
 
-        account.subtractFromBalance(amount);
-        accountRepository.save(account);
+            account.subtractFromBalance(amount);
+            accountRepository.save(account);
+            paymentStatusProducer.fulfillPayment(orderId, "Payment processed successfully for order id: " + orderId);
+        } catch (Exception error) {
+            paymentStatusProducer.rejectPayment(orderId, "Payment failed for order id: " + orderId + ". Error: " + error.getMessage());
+            throw new RuntimeException("Failed to process payment for order id: " + orderId, error);
+        }
     }
 
     @Override

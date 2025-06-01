@@ -1,4 +1,4 @@
-package com.example.payment.model.dto;
+package com.example.order.model;
 
 public enum OrderStatus {
     CREATED,

@@ -18,17 +18,19 @@ public class PaymentStatusProducer {
         this.kafkaTemplate = kafkaTemplate;
     }
 
-    public void fulfillPayment(Long orderId) {
+    public void fulfillPayment(Long orderId, String message) {
         PaymentStatusDto paymentStatusDto = new PaymentStatusDto();
-        paymentStatusDto.setStatus(OrderStatus.FULFILLED);
+        paymentStatusDto.setStatus(OrderStatus.PAYMENT_SUCCESS);
         paymentStatusDto.setOrderId(orderId);
+        paymentStatusDto.setMessage(message);
         kafkaTemplate.send(paymentStatusTopic, paymentStatusDto);
     }
 
-    public void rejectPayment(Long orderId) {
+    public void rejectPayment(Long orderId, String message) {
         PaymentStatusDto paymentStatusDto = new PaymentStatusDto();
-        paymentStatusDto.setStatus(OrderStatus.REJECTED);
+        paymentStatusDto.setStatus(OrderStatus.PAYMENT_FAILED);
         paymentStatusDto.setOrderId(orderId);
+        paymentStatusDto.setMessage(message);
         kafkaTemplate.send(paymentStatusTopic, paymentStatusDto);
     }
 }
