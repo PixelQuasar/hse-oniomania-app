@@ -1,6 +1,6 @@
 package com.example.order.model.dto;
 
-
+import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -8,16 +8,16 @@ import lombok.Setter;
 
 import java.math.BigDecimal;
 
+@NoArgsConstructor
 @Getter
 @Setter
-@NoArgsConstructor
-public class OrderCreatedDto {
-    @NotNull(message = "Order ID cannot be null")
-    private Long orderId;
-
+public class CreateOrderBodyDto {
     @NotNull(message = "User ID cannot be null")
     private Long userId;
 
-    @NotNull(message = "Amount cannot be null")
-    private BigDecimal amount;
+    @NotNull(message = "Price cannot be null")
+    @DecimalMin(value = "0.00", message = "Price must be at least 0.00")
+    private BigDecimal price;
+
+    private String metadata;
 }

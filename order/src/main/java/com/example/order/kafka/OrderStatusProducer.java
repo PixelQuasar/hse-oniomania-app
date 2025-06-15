@@ -2,6 +2,7 @@ package com.example.order.kafka;
 
 import com.example.order.model.OrderStatus;
 import com.example.order.model.dto.PaymentStatusDto;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Component;
@@ -11,9 +12,10 @@ public class OrderStatusProducer {
 
     private final KafkaTemplate<String, PaymentStatusDto> kafkaTemplate;
 
-    @Value("${spring.kafka.producer.topic}")
+    @Value("${spring.kafka.payment_status_topic}")
     private String paymentStatusTopic;
 
+    @Autowired
     public OrderStatusProducer(KafkaTemplate<String, PaymentStatusDto> kafkaTemplate) {
         this.kafkaTemplate = kafkaTemplate;
     }

@@ -1,37 +1,62 @@
 package com.example.order.service;
 
+import com.example.order.kafka.OrderCreatedProducer;
+import com.example.order.kafka.OrderStatusListener;
+import com.example.order.kafka.OrderStatusProducer;
 import com.example.order.model.Order;
+import com.example.order.model.OrderStatus;
+import com.example.order.model.dto.OrderCreatedDto;
 import com.example.order.repository.OrderRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class OrderService {
     private final OrderRepository orderRepository;
 
-    private final KafkaTemplate<String, String> kafkaTemplate;
+    private final OrderCreatedProducer orderCreatedProducer;
+
+    private final OrderStatusProducer orderStatusProducer;
 
     @Autowired
-    public OrderService(OrderRepository orderRepository, KafkaTemplate<String, String> kafkaTemplate) {
+    public OrderService(OrderRepository orderRepository, OrderCreatedProducer orderCreatedProducer, OrderStatusProducer orderStatusProducer) {
         this.orderRepository = orderRepository;
-        this.kafkaTemplate = kafkaTemplate;
+        this.orderCreatedProducer = orderCreatedProducer;
+        this.orderStatusProducer = orderStatusProducer;
     }
 
-    public Order createOrder(long userId, Order orderRequest) {
+    public Order createOrder(long userId, BigDecimal price, String metadata) {
+        Order order = new Order();
+        order.setUserId(userId);
+        order.setPrice(price);
+        order.setMetadata(metadata);
+        order.setStatus(OrderStatus.CREATED);
 
+        Order savedOrder = orderRepository.save(order);
+
+        OrderCreatedDto orderCreatedDto = new OrderCreatedDto();
+        orderCreatedDto.setOrderId(savedOrder.getId());
+        orderCreatedDto.setUserId(savedOrder.getUserId());
+        orderCreatedDto.setAmount(savedOrder.getPrice());
+
+        orderCreatedProducer.createOrder(savedOrder.getUserId(), savedOrder.getId(), savedOrder.getPrice());
+
+        return savedOrder;
     }
 
     public List<Order> getOrdersByUserId(long userId) {
         return orderRepository.findByUserId(userId);
     }
 
-    public Order getOrderById(long orderId) {
-        return orderRepository.findById(orderId)
-                .orElseThrow(() -> new RuntimeException("Order not found"));
+    public Optional<Order> getOrderById(long orderId) {
+        return orderRepository.findById(orderId);
     }
 
-    public Order UpdateStatus
+    public Optional<OrderStatus> get(long orderId) {
+        return orderRepository.findById(orderId).map(Order::getStatus);
+    }
 }
