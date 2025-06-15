@@ -12,6 +12,7 @@ import java.math.BigDecimal;
 @Setter
 @NoArgsConstructor
 public class OrderCreatedDto {
+
     @NotNull(message = "Order ID cannot be null")
     private Long orderId;
 

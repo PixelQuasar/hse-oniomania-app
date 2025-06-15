@@ -1,4 +1,4 @@
-package com.example.order.model.dto;
+package com.example.gateway.model.dto;
 
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotNull;

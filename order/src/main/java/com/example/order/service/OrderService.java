@@ -59,4 +59,14 @@ public class OrderService {
     public Optional<OrderStatus> get(long orderId) {
         return orderRepository.findById(orderId).map(Order::getStatus);
     }
+
+    public Order updateOrderStatus(long orderId, OrderStatus status) {
+        Order order = orderRepository.findById(orderId).orElseThrow(() -> new IllegalArgumentException("Order not found"));
+        order.setStatus(status);
+        return orderRepository.save(order);
+    }
+
+    List<Order> findByStatus(OrderStatus status) { return orderRepository.findByStatus(status); }
+
+    List<Order> findByStatusIn(List<OrderStatus> statuses) { return orderRepository.findByStatusIn(statuses); }
 }

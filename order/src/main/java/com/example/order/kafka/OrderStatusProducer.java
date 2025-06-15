@@ -35,12 +35,4 @@ public class OrderStatusProducer {
         paymentStatusDto.setMessage(message);
         kafkaTemplate.send(paymentStatusTopic, paymentStatusDto);
     }
-
-    public void orderProcessing(Long orderId, String message) {
-        PaymentStatusDto paymentStatusDto = new PaymentStatusDto();
-        paymentStatusDto.setStatus(OrderStatus.PAYMENT_PROCESSING);
-        paymentStatusDto.setOrderId(orderId);
-        paymentStatusDto.setMessage(message);
-        kafkaTemplate.send(paymentStatusTopic, paymentStatusDto);
-    }
 }
